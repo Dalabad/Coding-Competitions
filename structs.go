@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type Car struct {
@@ -12,7 +14,7 @@ type Car struct {
 }
 
 type Street struct {
-	Cars              []Car
+	Cars              []*Car
 	StartIntersection Intersection
 	EndIntersection   Intersection
 	Name              string
@@ -68,5 +70,87 @@ func (d *Dataset) writeOutput() {
 }
 
 func (d *Dataset) readInput(filename string) {
-	file, err := ioutil.ReadFile(fmt.Sprintf("/input/%s.txt", filename))
+	file, err := os.Open(fmt.Sprintf("input/%s.txt", filename))
+
+	if err != nil {
+		log.Fatalln("file not found")
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	paramsStrings := strings.Split(scanner.Text(), " ")
+	params := make([]int, len(paramsStrings))
+	for _, paramString := range paramsStrings {
+		param, _ := strconv.Atoi(paramString)
+		params = append(params, param)
+	}
+
+	time, intersectionsCount, streetsCount, carsCount, bonusPoints := params[0], params[1], params[2], params[3], params[4]
+	d.Time = time
+	d.Score = bonusPoints
+
+	for i := 0; i < streetsCount; i++ {
+		scanner.Scan()
+		streetData := strings.Split(scanner.Text(), " ")
+		startIntersectionId, _ := strconv.Atoi(streetData[0])
+		endIntersectionId, _ := strconv.Atoi(streetData[1])
+		name := streetData[2]
+		duration, _ := strconv.Atoi(streetData[3])
+		startIntersection := Intersection{
+			ID:       startIntersectionId,
+			Schedule: Schedule{Streets: make([]Street, 0)},
+		}
+		endIntersection := Intersection{
+			ID:       endIntersectionId,
+			Schedule: Schedule{},
+		}
+		if !ContainsIntersection(d.Intersections, startIntersection) {
+			d.Intersections = append(d.Intersections, startIntersection)
+		}
+		if !ContainsIntersection(d.Intersections, endIntersection) {
+			d.Intersections = append(d.Intersections, endIntersection)
+		}
+
+		street := Street{
+			Cars:              make([]*Car, 0),
+			StartIntersection: startIntersection,
+			EndIntersection:   Intersection{},
+			Name:              name,
+			Length:            duration,
+		}
+
+		d.Streets = append(d.Streets, street)
+	}
+	for i := 0; i < carsCount; i++ {
+		scanner.Scan()
+		carData := strings.Split(scanner.Text(), " ")
+		pathLength, _ := strconv.Atoi(carData[0])
+		car := Car{make([]Street, pathLength)}
+
+		for i := 1; i <= pathLength; i++ {
+			car.Path = append(car.Path, d.FindStreetByName(carData[i]))
+		}
+	}
+
+	if len(d.Intersections) != intersectionsCount {
+		panic("intersections count does not add up")
+	}
+}
+
+func (d *Dataset) FindStreetByName(name string) Street {
+	for _, street := range d.Streets {
+		if street.Name == name {
+			return street
+		}
+	}
+	panic(fmt.Sprintf("street %s not found", name))
+}
+
+func ContainsIntersection(intersections []Intersection, i Intersection) bool {
+	for _, intersection := range intersections {
+		if i.ID == intersection.ID {
+			return true
+		}
+	}
+	return false
 }
