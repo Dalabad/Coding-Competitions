@@ -204,6 +204,20 @@ func (d *Dataset) ReadInput(filename string) {
 		d.Cars = append(d.Cars, car)
 	}
 
+	for _, car := range d.Cars {
+		street := car.Path[0]
+		streets := d.Streets
+
+		for i := range streets {
+			if streets[i].Name == street.Name {
+				streets[i].Cars = append(streets[i].Cars, &car)
+				break
+			}
+		}
+
+		d.Streets = streets
+	}
+
 	if len(d.Intersections) != intersectionsCount {
 		panic("intersections count does not add up")
 	}
@@ -257,24 +271,27 @@ func (d *Dataset) Simulate() {
 			// Decrease duration of car on current street by 1
 			if car.DurationOnCurrentStreet > 0 {
 				car.DurationOnCurrentStreet--
+				fmt.Printf("car still on street for %d iterations\n", car.DurationOnCurrentStreet)
 				continue
 			}
 
 			if street.EndIntersection.isGreen(street, simulationTimestamp) {
 				// Set car to next street
 				if len(car.Path) > 1 {
+					fmt.Printf("Move car to next street\n")
 					car.Path = car.Path[1:]
 					car.DurationOnCurrentStreet = car.Path[0].Length
 				} else {
+					car.IsFinished = true
+					fmt.Printf("Car arrived at destination %+v\n", car)
 					// Car has completed its path, remove
-					car.Delete()
 					d.UpdateScore(simulationTimestamp)
 					continue
 				}
 
 				// Remove car from street
 				if len(street.Cars) > 1 {
-					street.Cars = street.Cars[0:]
+					street.Cars = street.Cars[1:]
 				} else {
 					street.Cars = []*Car{}
 				}

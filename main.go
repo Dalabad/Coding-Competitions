@@ -7,15 +7,16 @@ import (
 
 func main() {
 
-	files := []string{"a", "b", "c", "d", "e", "f"}
+	//files := []string{"a", "b", "c", "d", "e", "f"}
+	files := []string{"a"}
 
-	runDataset := 0
+	for _, file := range files {
+		d := src.Dataset{}
+		d.ReadInput(file)
+		d.SetSchedules()
+		d.Simulate()
+		d.WriteOutput(file)
 
-	d := src.Dataset{}
-	d.ReadInput(files[runDataset])
-	d.SetSchedules()
-	d.Simulate()
-	d.WriteOutput(files[runDataset])
-
-	fmt.Printf("Final Score: %d\n", d.Score)
+		fmt.Printf("%s - Final Score: %d\n", file, d.Score)
+	}
 }
