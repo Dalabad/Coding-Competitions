@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"hashcode/src"
+)
 
 func main() {
 
@@ -8,28 +11,10 @@ func main() {
 
 	runDataset := 0
 
-	d := Dataset{}
-	d.readInput(files[runDataset])
-	d.simulate()
-	d.writeOutput(files[runDataset])
+	d := src.Dataset{}
+	d.ReadInput(files[runDataset])
+	//d.Simulate()
+	d.WriteOutput(files[runDataset])
 
 	fmt.Printf("Final Score: %d\n", d.Score)
-}
-
-func (d *Dataset) simulate() {
-	for simulationTimestamp := 0; simulationTimestamp < d.Time; simulationTimestamp++ {
-		for _, car := range d.Cars {
-			currentStreet := car.Path[0]
-			if currentStreet.EndIntersection.isGreen(currentStreet, simulationTimestamp) {
-				// Set car to next street
-				if len(car.Path) > 1 {
-					car.Path = car.Path[1:]
-				} else {
-					// Car has completed its path, remove
-					car.Delete()
-					d.UpdateScore(simulationTimestamp)
-				}
-			}
-		}
-	}
 }
