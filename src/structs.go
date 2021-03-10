@@ -25,6 +25,7 @@ type Street struct {
 	EndIntersection   *Intersection
 	Name              string
 	Length            int
+	SumOfPaths int
 }
 
 type Intersection struct {
@@ -58,6 +59,7 @@ func (i *Intersection) isGreen(street Street, timestamp int) bool {
 type Schedule struct {
 	Streets  []*Street
 	Duration []int
+	Sched []string
 }
 
 type Dataset struct {
