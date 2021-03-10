@@ -12,10 +12,11 @@ import (
 type Car struct {
 	Path                    []Street
 	DurationOnCurrentStreet int
+	IsFinished              bool
 }
 
 func (c *Car) Delete() {
-	// TODO: Remove car
+	c.IsFinished = true
 }
 
 type Street struct {
@@ -155,6 +156,7 @@ func (d *Dataset) ReadInput(filename string) {
 			Length:            duration,
 		}
 		endIntersection.Schedule.Streets = append(endIntersection.Schedule.Streets, &street)
+		endIntersection.Schedule.Duration = append(endIntersection.Schedule.Duration, 0)
 
 		d.Streets = append(d.Streets, street)
 	}
