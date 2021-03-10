@@ -76,6 +76,10 @@ func (d *Dataset) WriteOutput(filename string) {
 	}
 	defer f.Close()
 	for _, intersection := range d.Intersections {
+		_, err = f.WriteString(fmt.Sprintf("%d\n", len(d.Intersections)))
+		if err != nil {
+			panic(err)
+		}
 		// ID of the intersection
 		_, err = f.WriteString(fmt.Sprintf("%d\n", intersection.ID))
 		if err != nil {
@@ -212,7 +216,9 @@ func (d *Dataset) UpdateScore(timestamp int) {
 }
 
 func (d *Dataset) Simulate() {
-	for simulationTimestamp := 0; simulationTimestamp < d.Time; simulationTimestamp++ {
+	for simulationTimestamp := 1; simulationTimestamp <= d.Time; simulationTimestamp++ {
+		fmt.Printf("Simulate step %d\n", simulationTimestamp)
+
 		for _, street := range d.Streets {
 			if len(street.Cars) <= 0 {
 				continue
