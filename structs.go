@@ -92,8 +92,6 @@ func (d *Dataset) writeOutput(filename string) {
 		}
 
 	}
-
-
 }
 
 func (d *Dataset) readInput(filename string) {
@@ -181,8 +179,6 @@ func ContainsIntersection(intersections []Intersection, i Intersection) bool {
 	}
 	return false
 }
-
-
 
 func (d *Dataset) UpdateScore(timestamp int) {
 	addScore := 1000 + (d.Time - timestamp)
