@@ -198,8 +198,8 @@ func (d *Dataset) ReadInput(filename string) {
 		pathLength, _ := strconv.Atoi(carData[0])
 		car := Car{Path: make([]Street, pathLength), DurationOnCurrentStreet: 0}
 
-		for i := 1; i <= pathLength; i++ {
-			car.Path = append(car.Path, d.FindStreetByName(carData[i]))
+		for j := 1; j <= pathLength; j++ {
+			car.Path[j-1] = d.FindStreetByName(carData[j])
 		}
 		d.Cars = append(d.Cars, car)
 	}
