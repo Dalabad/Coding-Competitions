@@ -113,7 +113,8 @@ func (d *Dataset) ReadInput(filename string) {
 		params = append(params, param)
 	}
 
-	_, intersectionsCount, streetsCount, carsCount, bonusPoints := params[0], params[1], params[2], params[3], params[4]
+	time, intersectionsCount, streetsCount, carsCount, bonusPoints := params[0], params[1], params[2], params[3], params[4]
+	d.Time = time
 	d.Bonus = bonusPoints
 
 	for i := 0; i < streetsCount; i++ {
