@@ -10,7 +10,8 @@ import (
 )
 
 type Car struct {
-	Path []Street
+	Path                    []Street
+	DurationOnCurrentStreet int
 }
 
 func (c *Car) Delete() {
@@ -150,7 +151,7 @@ func (d *Dataset) ReadInput(filename string) {
 		scanner.Scan()
 		carData := strings.Split(scanner.Text(), " ")
 		pathLength, _ := strconv.Atoi(carData[0])
-		car := Car{make([]Street, pathLength)}
+		car := Car{Path: make([]Street, pathLength), DurationOnCurrentStreet: 0}
 
 		for i := 1; i <= pathLength; i++ {
 			car.Path = append(car.Path, d.FindStreetByName(carData[i]))
@@ -196,10 +197,17 @@ func (d *Dataset) Simulate() {
 
 			car := street.Cars[0]
 
+			// Decrease duration of car on current street by 1
+			if car.DurationOnCurrentStreet > 0 {
+				car.DurationOnCurrentStreet--
+				continue
+			}
+
 			if street.EndIntersection.isGreen(street, simulationTimestamp) {
 				// Set car to next street
 				if len(car.Path) > 1 {
 					car.Path = car.Path[1:]
+					car.DurationOnCurrentStreet = car.Path[0].Length
 				} else {
 					// Car has completed its path, remove
 					car.Delete()
