@@ -167,6 +167,7 @@ func (d *Dataset) ReadInput(filename string) {
 		for i := 1; i <= pathLength; i++ {
 			car.Path = append(car.Path, d.FindStreetByName(carData[i]))
 		}
+		d.Cars = append(d.Cars, car)
 	}
 
 	if len(d.Intersections) != intersectionsCount {
