@@ -190,6 +190,10 @@ func (d *Dataset) UpdateScore(timestamp int) {
 func (d *Dataset) Simulate() {
 	for simulationTimestamp := 0; simulationTimestamp < d.Time; simulationTimestamp++ {
 		for _, street := range d.Streets {
+			if len(street.Cars) <= 0 {
+				continue
+			}
+
 			car := street.Cars[0]
 
 			if street.EndIntersection.isGreen(street, simulationTimestamp) {
