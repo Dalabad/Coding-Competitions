@@ -75,23 +75,51 @@ func (d *Dataset) WriteOutput(filename string) {
 		log.Fatal(err)
 	}
 	defer f.Close()
+
+	amountIntersections := 0
 	for _, intersection := range d.Intersections {
-		_, err = f.WriteString(fmt.Sprintf("%d\n", len(d.Intersections)))
-		if err != nil {
-			panic(err)
+		for _, dur := range intersection.Schedule.Duration {
+			if dur > 0 {
+				amountIntersections++
+				break
+			}
 		}
+	}
+
+	_, err = f.WriteString(fmt.Sprintf("%d\n", amountIntersections))
+	if err != nil {
+		panic(err)
+	}
+
+	for _, intersection := range d.Intersections {
+
+		amountOfSchedules := 0
+		for _, dur := range intersection.Schedule.Duration {
+			if dur > 0 {
+				amountOfSchedules++
+			}
+		}
+
+		if amountOfSchedules == 0 {
+			continue
+		}
+
 		// ID of the intersection
 		_, err = f.WriteString(fmt.Sprintf("%d\n", intersection.ID))
 		if err != nil {
 			panic(err)
 		}
 		// Number of incoming streets
-		_, err = f.WriteString(fmt.Sprintf("%d\n", len(intersection.Schedule.Streets)))
+		_, err = f.WriteString(fmt.Sprintf("%d\n", amountOfSchedules))
 		if err != nil {
 			panic(err)
 		}
 		// Schedule with the format: "street_name duration"
 		for i, street := range intersection.Schedule.Streets {
+			if intersection.Schedule.Duration[i] == 0 {
+				continue
+			}
+
 			_, err = f.WriteString(fmt.Sprintf("%s %d\n", street.Name, intersection.Schedule.Duration[i]))
 			if err != nil {
 				log.Fatal(err)
@@ -289,34 +317,14 @@ func (d *Dataset) getAllUnUsedStreets(cars []Car) []Street {
 
 	var streets []Street
 
-	for name := range streetNames {
-		for _, street := range d.Streets {
+	outer:
+	for _, street := range d.Streets {
+		for name := range streetNames {
 			if street.Name == name {
-				continue
-			}
-			streets = append(streets, street)
-		}
-	}
-
-	return streets
-}
-
-func (d *Dataset) getAllUsedStreets(cars []Car) []Street {
-	streetNames := make(map[string]bool)
-	for _, car := range cars {
-		for _, street := range car.Path {
-			streetNames[street.Name] = true
-		}
-	}
-
-	var streets []Street
-
-	for name := range streetNames {
-		for _, street := range d.Streets {
-			if street.Name == name {
-			streets = append(streets, street)
+				break outer
 			}
 		}
+		streets = append(streets, street)
 	}
 
 	return streets
