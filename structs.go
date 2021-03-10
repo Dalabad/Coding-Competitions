@@ -11,6 +11,10 @@ type Car struct {
 	Path []Street
 }
 
+func (c *Car) Delete() {
+	// TODO: Remove car
+}
+
 type Street struct {
 	Cars              []Car
 	StartIntersection Intersection
@@ -22,6 +26,29 @@ type Street struct {
 type Intersection struct {
 	ID       int
 	Schedule Schedule
+}
+
+func (i *Intersection) isGreen(street Street, timestamp int) bool {
+	if len(i.Schedule.Duration) == 0 {
+		return false
+	}
+
+	overallDuration := 0
+	for _, v := range i.Schedule.Duration {
+		overallDuration += v
+	}
+
+	remaining := timestamp % overallDuration
+
+	for streetIndex, duration := range i.Schedule.Duration {
+		if remaining > duration {
+			remaining -= duration
+		} else {
+			return i.Schedule.Streets[streetIndex].Name == street.Name
+		}
+	}
+
+	return false
 }
 
 type Schedule struct {
@@ -69,4 +96,12 @@ func (d *Dataset) writeOutput() {
 
 func (d *Dataset) readInput(filename string) {
 	file, err := ioutil.ReadFile(fmt.Sprintf("/input/%s.txt", filename))
+}
+
+
+
+func (d *Dataset) UpdateScore(timestamp int) {
+	addScore := 1000 + (d.Time - timestamp)
+	d.Score += addScore
+	fmt.Printf("Increase Score by %d\n", addScore)
 }
