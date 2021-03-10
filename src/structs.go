@@ -271,6 +271,7 @@ func (d *Dataset) Simulate() {
 			// Check if car has already been moved during previous street calculations
 			for _, movedCar := range alreadyMovedCars {
 				if movedCar == car {
+					fmt.Printf("First car in line, has been just moved from a previous street, skip\n")
 					break outer
 				}
 			}

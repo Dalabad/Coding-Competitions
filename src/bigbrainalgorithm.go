@@ -59,7 +59,7 @@ func (in *Intersection) setSched(d *Dataset) {
 	//insert first street already
 	for _, street := range d.Streets {
 		if street.Name == in.Schedule.Sched[0] {
-			in.Schedule.Streets[0] = &street
+			in.Schedule.Streets[0] = street
 			in.Schedule.Duration[0]++
 
 		}
@@ -69,7 +69,7 @@ func (in *Intersection) setSched(d *Dataset) {
 		if in.Schedule.Sched[i] != last {
 			for _, street := range d.Streets {
 				if street.Name == in.Schedule.Sched[i] {
-					in.Schedule.Streets[i] = &street
+					in.Schedule.Streets[i] = street
 				}
 			}
 		}
