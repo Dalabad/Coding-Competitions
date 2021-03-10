@@ -1,4 +1,4 @@
-package main
+package src
 
 import (
 	"bufio"
@@ -66,7 +66,7 @@ type Dataset struct {
 	Cars          []Car
 }
 
-func (d *Dataset) writeOutput(filename string) {
+func (d *Dataset) WriteOutput(filename string) {
 	f, err := os.Create(fmt.Sprintf("output/%s.out", filename))
 	if err != nil {
 		log.Fatal(err)
@@ -94,7 +94,7 @@ func (d *Dataset) writeOutput(filename string) {
 	}
 }
 
-func (d *Dataset) readInput(filename string) {
+func (d *Dataset) ReadInput(filename string) {
 	file, err := os.Open(fmt.Sprintf("input/%s.txt", filename))
 
 	if err != nil {
@@ -104,7 +104,7 @@ func (d *Dataset) readInput(filename string) {
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()
 	paramsStrings := strings.Split(scanner.Text(), " ")
-	params := make([]int, len(paramsStrings))
+	params := make([]int, 0)
 	for _, paramString := range paramsStrings {
 		param, _ := strconv.Atoi(paramString)
 		params = append(params, param)
@@ -160,6 +160,7 @@ func (d *Dataset) readInput(filename string) {
 	if len(d.Intersections) != intersectionsCount {
 		panic("intersections count does not add up")
 	}
+	println(len(d.Intersections))
 }
 
 func (d *Dataset) FindStreetByName(name string) Street {
@@ -184,4 +185,22 @@ func (d *Dataset) UpdateScore(timestamp int) {
 	addScore := 1000 + (d.Time - timestamp)
 	d.Score += addScore
 	fmt.Printf("Increase Score by %d\n", addScore)
+}
+
+func (d *Dataset) simulate() {
+	for simulationTimestamp := 0; simulationTimestamp < d.Time; simulationTimestamp++ {
+		for _, car := range d.Cars {
+			currentStreet := car.Path[0]
+			if currentStreet.EndIntersection.isGreen(currentStreet, simulationTimestamp) {
+				// Set car to next street
+				if len(car.Path) > 1 {
+					car.Path = car.Path[1:]
+				} else {
+					// Car has completed its path, remove
+					car.Delete()
+					d.UpdateScore(simulationTimestamp)
+				}
+			}
+		}
+	}
 }
