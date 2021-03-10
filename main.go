@@ -13,6 +13,7 @@ func main() {
 
 	d := src.Dataset{}
 	d.ReadInput(files[runDataset])
+	d.SetSchedules()
 	d.Simulate()
 	d.WriteOutput(files[runDataset])
 

@@ -230,3 +230,45 @@ func (d *Dataset) Simulate() {
 		}
 	}
 }
+
+func (d *Dataset) SetSchedules() {
+	for _, intersection := range d.Intersections {
+		// Eliminate empty streets by setting traffic light to red
+		streets := d.getAllUnUsedStreets(d.Cars)
+
+		for _, street := range streets {
+			for streetIndex, intersectionStreet := range intersection.Schedule.Streets {
+				if street.Name == intersectionStreet.Name {
+					intersection.Schedule.Duration[streetIndex] = 0
+				}
+			}
+		}
+
+		// Set traffic lights to green if only one road incoming
+		if len(intersection.Schedule.Streets) == 1 {
+			intersection.Schedule.Duration[0] = d.Time
+		}
+	}
+}
+
+func (d *Dataset) getAllUnUsedStreets(cars []Car) []Street {
+	streetNames := make(map[string]bool)
+	for _, car := range cars {
+		for _, street := range car.Path {
+			streetNames[street.Name] = true
+		}
+	}
+
+	var streets []Street
+
+	for name := range streetNames {
+		for _, street := range d.Streets {
+			if street.Name == name {
+				continue
+			}
+			streets = append(streets, street)
+		}
+	}
+
+	return streets
+}
