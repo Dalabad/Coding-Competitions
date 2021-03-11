@@ -20,7 +20,7 @@ type Street struct {
 	EndIntersection   *Intersection
 	Name              string
 	Length            int
-	SumOfPaths int
+	SumOfPaths        int
 }
 
 type Intersection struct {
@@ -54,7 +54,7 @@ func (i *Intersection) isGreen(street Street, timestamp int) bool {
 type Schedule struct {
 	Streets  []*Street
 	Duration []int
-	Sched []string
+	Sched    []string
 }
 
 type Dataset struct {
@@ -259,7 +259,7 @@ func (d *Dataset) Simulate() {
 
 		var alreadyMovedCars []*Car
 
-		outer:
+	outer:
 		for _, street := range d.Streets {
 			if len(street.Cars) <= 0 {
 				continue
@@ -318,7 +318,27 @@ func (d *Dataset) Simulate() {
 }
 
 func (d *Dataset) SetSchedules() {
+	averageUsage, streetUsage := d.getAverageSteetUsage()
+
 	for _, intersection := range d.Intersections {
+		// Set traffic lights to green if only one road incoming
+		numStreets := len(intersection.Schedule.Streets)
+		if numStreets == 1 {
+			intersection.Schedule.Duration[0] = d.Time
+		} else if numStreets > 1 {
+			for i := 0; i < numStreets; i++ {
+				sUsage := streetUsage[intersection.Schedule.Streets[i].Name]
+
+				if sUsage > 2*averageUsage {
+					intersection.Schedule.Duration[i] = 3
+				} else if sUsage > averageUsage {
+					intersection.Schedule.Duration[i] = 2
+				} else {
+					intersection.Schedule.Duration[i] = 1
+				}
+			}
+		}
+
 		// Eliminate empty streets by setting traffic light to red
 		streets := d.getAllUnUsedStreets(d.Cars)
 
@@ -329,17 +349,30 @@ func (d *Dataset) SetSchedules() {
 				}
 			}
 		}
+	}
+}
 
-		// Set traffic lights to green if only one road incoming
-		numStreets := len(intersection.Schedule.Streets)
-		if numStreets == 1 {
-			intersection.Schedule.Duration[0] = d.Time
-		} else if numStreets > 1 {
-			for i := 0; i < numStreets; i++ {
-				intersection.Schedule.Duration[i] = 1
+func (d *Dataset) getAverageSteetUsage() (int, map[string]int) {
+	averageUsage := 0
+	usage := make(map[string]int)
+
+	for _, car := range d.Cars {
+		for _, street := range car.Path {
+			if val, ok := usage[street.Name]; ok {
+				usage[street.Name] = val + 1
+			} else {
+				usage[street.Name] = 1
 			}
 		}
 	}
+
+	total := 0
+	for _, val := range usage {
+		total += val
+	}
+	averageUsage = total / len(d.Cars)
+
+	return averageUsage, usage
 }
 
 func (d *Dataset) getAllUnUsedStreets(cars []*Car) []*Street {
